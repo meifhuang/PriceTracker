@@ -1,0 +1,18 @@
+# Ignore virtual environments
+venv/
+.env/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore package installs
+site-packages/
+websockets/
+
+# Ignore OS / editor files
+.DS_Store
+.vscode/
+*.log
+*.db
+pricetracker.db
