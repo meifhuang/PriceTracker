@@ -11,13 +11,7 @@ jobs:
     steps: 
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Install Google Chrome
-        run: |
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -32,12 +26,4 @@ jobs:
             DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           python scraper.py
-
-      - name: Upload log file
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scraper-log
-          path: price_tracker.log
-
       
