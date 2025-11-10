@@ -15,12 +15,10 @@ load_dotenv()
 
 # --- Setup logging ---
 logging.basicConfig(
+    filename="price_tracker.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("price_tracker.log", mode="a"),
-        logging.StreamHandler()
-    ]
+    filemode='a' 
 )
 
 def scrape_chewy(driver):
