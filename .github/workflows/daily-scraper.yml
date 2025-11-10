@@ -25,5 +25,5 @@ jobs:
         env:
             DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          python scraper.py
+          xvfb-run -a python scraper.py
       
