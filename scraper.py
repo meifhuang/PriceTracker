@@ -27,7 +27,7 @@ def scrape_chewy(driver):
     url = 'https://www.chewy.com/nulo-freestyle-turkey-chicken-recipe/dp/168510'
     try:
         driver.get(url)
-        time.sleep(random.uniform(3.0, 6.0))
+        time.sleep(random.uniform(4.0, 6.0))
         sale_price = driver.find_elements(by=By.CLASS_NAME, value="styles_priceNoDeal__JGk8L")
         if not sale_price:
             logging.warning(f"No price found on Chewy page:")
@@ -52,12 +52,13 @@ def scrape_amazon(driver):
     url = 'https://www.amazon.com/Nulo-Turkey-Chicken-Canned-Ounce/dp/B06WV774HB'
     try:
         driver.get(url)
-        time.sleep(random.uniform(3.0, 6.0))
+        time.sleep(random.uniform(4.0, 6.0))
         whole_price = driver.find_elements(by=By.CLASS_NAME, value="a-price-whole")
         fraction_price = driver.find_elements(by=By.CLASS_NAME, value="a-price-fraction")
         
         if not whole_price or not fraction_price:
-            logging.error(f"Failed to scrape from Amazon:{e}")
+            logging.error(f"Failed to scrape from Amazon:")
+
         price = int(whole_price[0].text) + (int(fraction_price[0].text) * .01)
         pack_size = "12 cans"
         unit_oz = 12.5
@@ -79,7 +80,7 @@ def scrape_petco(driver):
     url = 'https://www.petco.com/shop/en/petcostore/product/nulo-medalseries-grain-free-turkey-and-chicken-wet-cat-food'
     try:
         driver.get(url)
-        time.sleep(random.uniform(3.0, 6.0))
+        time.sleep(random.uniform(4.0, 6.0))
         sale_price = driver.find_elements(by=By.CLASS_NAME, value="purchase-type-selector-styled__PurchaseTypePrice-sc-663c57fc-1")
         if not sale_price:
             logging.warning(f"No price found on Petco page:")
@@ -104,7 +105,7 @@ def scrape_petsmart(driver):
     url = 'https://www.petsmart.com/cat/food-and-treats/wet-food/nulo-medalseries--all-life-stages-wet-cat-food---grain-free-no-corn-wheat-and-soy-125-oz-36959.html'
     try:
         driver.get(url)
-        time.sleep(random.uniform(3.0, 6.0))
+        time.sleep(random.uniform(4.0, 6.0))
         sale_price = driver.find_elements(by=By.CLASS_NAME, value="sparky-c-price--sale")
         og_price = driver.find_elements(by=By.CLASS_NAME, value="sparky-c-price")
         price_str = sale_price[0].text if sale_price else og_price[0].text if og_price else None
@@ -178,8 +179,8 @@ def run_scraper():
     # options.add_argument("--headless=new")  # modern headless mode
     options.add_argument("--no-sandbox")  # required for CI environments
     options.add_argument("--disable-dev-shm-usage")  # shared memory issue in Docker/CI
-    if os.getenv("CI") == "true":
-        options.add_argument("--headless")
+    # if os.getenv("CI") == "true":
+    #     options.add_argument("--headless")
     
     
     driver = uc.Chrome(options=options)
