@@ -8,6 +8,9 @@ from datetime import datetime
 import psycopg2
 import os
 from dotenv import load_dotenv
+from psycopg2 import OperationalError
+
+
 load_dotenv()
 
 # --- Setup logging ---
@@ -155,6 +158,15 @@ def insert_price_record(cursor, product_data):
     except Exception as e:
         logging.error(f"Failed to insert record for {product_data.get('company')}: {e}")
 
+def connect_with_retry(url, retries=5, delay=5):
+    for i in range(retries):
+        try:
+            conn = psycopg2.connect(url, sslmode="require")
+            return conn
+        except OperationalError as e:
+            print(f"Postgres connection failed ({i+1}/{retries}): {e}")
+            time.sleep(delay)
+    raise OperationalError(f"Could not connect after {retries} attempts")
 
 def run_scraper():
     options = uc.ChromeOptions()
@@ -163,22 +175,26 @@ def run_scraper():
     "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/142.0.0.0 Safari/537.36")
+    # options.add_argument("--headless=new")  # modern headless mode
+    options.add_argument("--no-sandbox")  # required for CI environments
+    options.add_argument("--disable-dev-shm-usage")  # shared memory issue in Docker/CI
     driver = uc.Chrome(options=options)
     url = os.getenv("db_url")
 
     try:
-        with psycopg2.connect(url, sslmode="require") as pg_conn:
-            with pg_conn.cursor() as pg_cursor:
-                for scrape in [scrape_petsmart, scrape_petco, scrape_chewy, scrape_amazon]:
-                    try:
-                        record = scrape(driver)
-                        if record:
-                            insert_price_record(pg_cursor,record)
-                    except Exception as e:
-                        logging.warning(f"{scrape} failed {e}")
-                pg_conn.commit() 
-                print("Scraped and inserted data")
-        
+        pg_conn = connect_with_retry(url)
+        with pg_conn.cursor() as pg_cursor:
+            for scrape in [scrape_petsmart, scrape_petco, scrape_chewy, scrape_amazon]:
+                try:
+                    record = scrape(driver)
+                    if record:
+                        insert_price_record(pg_cursor,record)
+                        pg_conn.commit() 
+                except Exception as e:
+                    pg_conn.rollback()
+                    logging.warning(f"{scrape} failed {e}")
+            print("Scraped and inserted data")
+    
     except psycopg2.OperationalError as e:
         print(f"Error connecting to PostgreSQL: {e}")
         raise
