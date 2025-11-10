@@ -183,7 +183,7 @@ def run_scraper():
     
     
     driver = uc.Chrome(options=options)
-    url = os.getenv("db_url")
+    url = os.getenv("DATABASE_URL")
 
     try:
         pg_conn = connect_with_retry(url)
