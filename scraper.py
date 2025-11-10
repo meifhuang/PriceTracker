@@ -178,6 +178,12 @@ def run_scraper():
     # options.add_argument("--headless=new")  # modern headless mode
     options.add_argument("--no-sandbox")  # required for CI environments
     options.add_argument("--disable-dev-shm-usage")  # shared memory issue in Docker/CI
+    if os.getenv("CI") == "true":  # GitHub Actions sets CI=true
+        options.add_argument("--headless=new")
+    else:
+        options.add_argument("--headless")
+    
+    
     driver = uc.Chrome(options=options)
     url = os.getenv("db_url")
 
