@@ -5,12 +5,15 @@ from selenium.webdriver.support import expected_conditions as EC
 import logging
 import time, random
 from datetime import datetime
-import sqlite3
+import psycopg2
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # --- Setup logging ---
 logging.basicConfig(
     filename="price_tracker.log",
-    level=logging.WARNING,
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
@@ -132,8 +135,8 @@ def insert_price_record(cursor, product_data):
     try:
         cursor.execute(
             '''
-            INSERT INTO prices (product, company, url, date, price, price_per_oz, pack_size)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO "prices" (product, company, url, date, price, price_per_oz, pack_size)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             ''',
             (
                 product,
@@ -145,6 +148,7 @@ def insert_price_record(cursor, product_data):
                 product_data['pack_size'],
             )
         )
+        logging.info(f"Inserted {product_data['company']} at {product_data['price']}")
     except Exception as e:
         logging.error(f"Failed to insert record for {product_data.get('company')}: {e}")
 
@@ -157,22 +161,31 @@ def run_scraper():
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/142.0.0.0 Safari/537.36")
     driver = uc.Chrome(options=options)
+    url = os.getenv("db_url")
 
-    conn = sqlite3.connect("pricetracker.db")
-    cursor = conn.cursor()
+    try:
+        with psycopg2.connect(url, sslmode="require") as pg_conn:
+            with pg_conn.cursor() as pg_cursor:
+                for scrape in [scrape_petsmart, scrape_petco, scrape_chewy, scrape_amazon]:
+                    try:
+                        record = scrape(driver)
+                        if record:
+                            insert_price_record(pg_cursor,record)
+                    except Exception as e:
+                        logging.warning(f"{scrape} failed {e}")
+                pg_conn.commit() 
+                print("Scraped and inserted data")
+        
+    except psycopg2.OperationalError as e:
+        print(f"Error connecting to PostgreSQL: {e}")
+        raise
 
-    for scrape in [scrape_petsmart, scrape_petco, scrape_chewy, scrape_amazon]:
-        try:
-            record = scrape(driver)
-            if record:
-                insert_price_record(cursor,record)
-        except Exception as e:
-            logging.warning(f"{scrape} failed {e}")
-            pass
-
-    driver.quit()
-    conn.commit()
-    conn.close()
+    except Exception as e:
+        print(f"Error : {e}")
+        
+    finally: 
+        driver.quit()
+ 
 
 run_scraper()
 
