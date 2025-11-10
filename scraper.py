@@ -27,12 +27,13 @@ def scrape_chewy(driver):
     url = 'https://www.chewy.com/nulo-freestyle-turkey-chicken-recipe/dp/168510'
     try:
         driver.get(url)
-        time.sleep(random.uniform(4.0, 6.0))
-        sale_price = driver.find_elements(by=By.CLASS_NAME, value="styles_priceNoDeal__JGk8L")
+        time.sleep(random.uniform(6.0, 10.0))
+        sale_price = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME,"styles_priceNoDeal__JGk8L")))
         if not sale_price:
             logging.warning(f"No price found on Chewy page:")
             return None
-        price = sale_price[0].text.splitlines()[-1].replace('$', '').strip()
+        price = sale_price.text.splitlines()[-1].replace('$', '').strip()
         pack_size = "12 cans"
         unit_oz = 12.5
         price_per_oz = (float(price) / 12.0) / unit_oz
@@ -52,14 +53,16 @@ def scrape_amazon(driver):
     url = 'https://www.amazon.com/Nulo-Turkey-Chicken-Canned-Ounce/dp/B06WV774HB'
     try:
         driver.get(url)
-        time.sleep(random.uniform(4.0, 6.0))
-        whole_price = driver.find_elements(by=By.CLASS_NAME, value="a-price-whole")
-        fraction_price = driver.find_elements(by=By.CLASS_NAME, value="a-price-fraction")
+        time.sleep(random.uniform(6.0, 10.0))
+        whole_price = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME,"a-price-whole")))
+        fraction_price = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME,"a-price-fraction")))
         
         if not whole_price or not fraction_price:
             logging.error(f"Failed to scrape from Amazon:")
 
-        price = int(whole_price[0].text) + (int(fraction_price[0].text) * .01)
+        price = int(whole_price.text) + (int(fraction_price.text) * .01)
         pack_size = "12 cans"
         unit_oz = 12.5
         price_per_oz = (price / 12) / unit_oz
@@ -80,12 +83,13 @@ def scrape_petco(driver):
     url = 'https://www.petco.com/shop/en/petcostore/product/nulo-medalseries-grain-free-turkey-and-chicken-wet-cat-food'
     try:
         driver.get(url)
-        time.sleep(random.uniform(4.0, 6.0))
-        sale_price = driver.find_elements(by=By.CLASS_NAME, value="purchase-type-selector-styled__PurchaseTypePrice-sc-663c57fc-1")
+        time.sleep(random.uniform(6.0, 10.0))
+        sale_price = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME,"purchase-type-selector-styled__PurchaseTypePrice-sc-663c57fc-1")))
         if not sale_price:
             logging.warning(f"No price found on Petco page:")
             return None
-        price_clean = float(sale_price[0].text.replace('$','').strip())
+        price_clean = float(sale_price.text.replace('$','').strip())
         pack_size = "12 cans"
         unit_oz = 12.5
         price_per_oz = (price_clean / 12) / unit_oz
@@ -105,10 +109,12 @@ def scrape_petsmart(driver):
     url = 'https://www.petsmart.com/cat/food-and-treats/wet-food/nulo-medalseries--all-life-stages-wet-cat-food---grain-free-no-corn-wheat-and-soy-125-oz-36959.html'
     try:
         driver.get(url)
-        time.sleep(random.uniform(4.0, 6.0))
-        sale_price = driver.find_elements(by=By.CLASS_NAME, value="sparky-c-price--sale")
-        og_price = driver.find_elements(by=By.CLASS_NAME, value="sparky-c-price")
-        price_str = sale_price[0].text if sale_price else og_price[0].text if og_price else None
+        time.sleep(random.uniform(6.0, 10.0))
+        sale_price = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME,"sparky-c-price--sale")))
+        og_price = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME,"sparky-c-price")))
+        price_str = sale_price.text if sale_price else og_price.text if og_price else None
         
         if not price_str:
             logging.warning(f"No price found on Petsmart page")
@@ -179,8 +185,8 @@ def run_scraper():
     # options.add_argument("--headless=new")  # modern headless mode
     options.add_argument("--no-sandbox")  # required for CI environments
     options.add_argument("--disable-dev-shm-usage")  # shared memory issue in Docker/CI
-    # if os.getenv("CI") == "true":
-    #     options.add_argument("--headless")
+    if os.getenv("CI") == "true":
+        options.add_argument("--headless")
     
     
     driver = uc.Chrome(options=options)
@@ -195,10 +201,10 @@ def run_scraper():
                     if record:
                         insert_price_record(pg_cursor,record)
                         pg_conn.commit() 
+       
                 except Exception as e:
                     pg_conn.rollback()
                     logging.warning(f"{scrape} failed {e}")
-            print("Scraped and inserted data")
     
     except psycopg2.OperationalError as e:
         print(f"Error connecting to PostgreSQL: {e}")
