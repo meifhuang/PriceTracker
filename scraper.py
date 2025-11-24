@@ -9,6 +9,7 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 from psycopg2 import OperationalError
+import re
 
 
 load_dotenv()
@@ -84,13 +85,36 @@ def scrape_petco(driver):
         time.sleep(random.uniform(6.0, 10.0))
         sale_price = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME,"purchase-type-selector-styled__PurchaseTypePrice-sc-663c57fc-1")))
+        
+        discount_elems = driver.find_elements(By.ID, "sale-message-red")
+        discount = discount_elems[0] if discount_elems else None
+
         if not sale_price:
             logging.warning(f"No price found on Petco page:")
             return None
+        # parse discount if present (look for "XX%")
+        percent_off = None
+        if discount:
+            discount_text = discount.text
+            m = re.search(r'(\d+)%', discount_text)
+            if m:
+                try:
+                    percent_off = int(m.group(1))
+                except ValueError:
+                    percent_off = None
+
+        if percent_off is not None:
+            logging.info(f"Petco discount: {percent_off}%")
+
         price_clean = float(sale_price.text.replace('$','').strip())
+        # apply discount if any
+        if percent_off:
+            price_clean = price_clean * (100 - percent_off) / 100.0
+
         pack_size = "12 cans"
         unit_oz = 12.5
         price_per_oz = (price_clean / 12) / unit_oz
+    
         return {
             'company': 'Petco',
             'price': price_clean,
@@ -181,8 +205,8 @@ def run_scraper():
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/142.0.0.0 Safari/537.36")
     # options.add_argument("--headless=new")  # modern headless mode
-    options.add_argument("--no-sandbox")  # required for CI environments
-    options.add_argument("--disable-dev-shm-usage")  # shared memory issue in Docker/CI
+    # options.add_argument("--no-sandbox")  # required for CI environments
+    # options.add_argument("--disable-dev-shm-usage")  # shared memory issue in Docker/CI
     # if os.getenv("CI") == "true":
     #     options.add_argument("--headless")
     
@@ -199,7 +223,7 @@ def run_scraper():
                     if record:
                         insert_price_record(pg_cursor,record)
                         pg_conn.commit() 
-       
+
                 except Exception as e:
                     pg_conn.rollback()
                     logging.warning(f"{scrape} failed {e}")
@@ -216,5 +240,3 @@ def run_scraper():
  
 
 run_scraper()
-
-

@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Price Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>body{font-family: Arial, sans-serif; margin:20px;} #chart{width:100%;height:600px;}</style>
+  </head>
+  <body>
+    <!-- <h2>Nulo - Price per oz by Store</h2> -->
+    <div id="chart"></div>
+
+    <script>
+      const traces = {{ traces | safe }};
+      const layout = {
+        title: "Nulo Price per oz over time", 
+        xaxis: { title: "Date", type: "date" },
+        yaxis: { title: "Price per oz" },
+        hovermode: "closest"
+      };
+      Plotly.newPlot("chart", traces, layout, {responsive: true});
+    </script>
+  </body>
+</html>
