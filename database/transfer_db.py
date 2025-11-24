@@ -4,7 +4,6 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
 DB_CONFIG = {
     "hostname": os.getenv("hostname"),
     "database": os.getenv("database"),
@@ -13,6 +12,7 @@ DB_CONFIG = {
     "password": os.getenv("password"),
 }
 
+load_dotenv()
 url = os.getenv("db_url")
 
 # SQLite connection

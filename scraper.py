@@ -10,7 +10,7 @@ import os
 from dotenv import load_dotenv
 from psycopg2 import OperationalError
 import re
-
+from database.connect_db import connect_with_retry
 
 load_dotenv()
 
@@ -187,15 +187,6 @@ def insert_price_record(cursor, product_data):
     except Exception as e:
         logging.error(f"Failed to insert record for {product_data.get('company')}: {e}")
 
-def connect_with_retry(url, retries=5, delay=5):
-    for i in range(retries):
-        try:
-            conn = psycopg2.connect(url, sslmode="require")
-            return conn
-        except OperationalError as e:
-            print(f"Postgres connection failed ({i+1}/{retries}): {e}")
-            time.sleep(delay)
-    raise OperationalError(f"Could not connect after {retries} attempts")
 
 def run_scraper():
     options = uc.ChromeOptions()

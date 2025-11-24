@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>New Expense</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/new_expense.css') }}">
+    <style>
+      /* small topbar/button styles so navigation matches dashboard */
+      .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+      .topbar .title { display:flex; align-items:center; gap:12px; }
+      .topbar h1 { margin:0; color:var(--accent-2); font-size:1.05rem; }
+      .nav-actions { display:flex; gap:8px; }
+      .btn { display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600; cursor:pointer; }
+      .btn.primary { background:linear-gradient(180deg,var(--accent),var(--accent-2)); color:#fff; box-shadow:0 8px 18px rgba(51,180,168,0.12); border:none; }
+      .btn.light { background:#fff; color:var(--accent-2); border:1px solid rgba(31,155,143,0.08); }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <div class="card">
+        <div class="topbar">
+          <div class="title">
+            <h1>Add Expense</h1>
+            <div class="muted">Record a purchase</div>
+          </div>
+          <div class="nav-actions">
+            <a class="btn light" href="{{ url_for('dashboard') }}">← Dashboard</a>
+            <a class="btn" href="{{ url_for('list_expenses') }}">Transactions</a>
+          </div>
+        </div>
+
+        <form class="expense-form" method="post" action="/api/expenses" id="expenseForm">
+          <label>Item name
+            <input name="item_name" id="item_name" required>
+          </label>
+
+          <label>Brand
+            <input name="brand" id="brand">
+          </label>
+
+          <label>Company
+            <input name="company" id="company" required>
+          </label>
+
+          <label>URL
+            <input name="url" id="url" type="url" placeholder="https://">
+          </label>
+
+          <label>Type
+            <select name="item_type" id="item_type">
+              <option value="food">food</option>
+              <option value="litter">litter</option>
+              <option value="toys">toys</option>
+              <option value="snacks">snacks</option>
+            </select>
+          </label>
+
+          <label>Total before tax
+            <input name="total_before_tax" id="total_before_tax" type="number" step="0.01" min="0">
+          </label>
+
+          <label>Cashback %
+            <input name="cashback_pct" id="cashback_pct" type="number" step="0.01" min="0" max="100" value=0>
+          </label>
+
+          <label>Cashback engine
+            <input name="cashback_engine" id="cashback_engine">
+          </label>
+
+          <label>Cashback amount
+            <div class="computed" id="cashback_amount_display">—</div>
+          </label>
+
+          <label>Total after cashback
+            <div class="computed" id="total_after_display">—</div>
+            <input name="total_after_cashback" id="total_after_cashback" type="hidden">
+          </label>
+
+          <input name="cashback_amount" id="cashback_amount" type="hidden">
+
+          <label>Date purchased
+            <input name="date_purchased" id="date_purchased" type="date">
+          </label>
+
+          <label>Notes
+            <textarea name="notes" id="notes" rows="3"></textarea>
+          </label>
+
+          <div class="actions">
+            <button type="submit" class="btn primary">Add</button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/new_expense.js') }}"></script>
+  </body>
+</html>

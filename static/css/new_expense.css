@@ -1,0 +1,130 @@
+:root {
+  --bg-1: #ecfdf6;      /* very light mint */
+  --bg-2: #e6f7fb;      /* light aqua */
+  --card: #ffffff;
+  --accent: #33b4a8;    /* turquoise */
+  --accent-2: #1f9b8f;  /* darker turquoise */
+  --text: #09363a;
+  --muted: #5f7574;
+  --input-border: #e6f7f5;
+  --shadow: 0 10px 30px rgba(7, 46, 46, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Centered container */
+.container {
+  width: 100%;
+  max-width: 720px;
+  padding: 1rem;
+}
+
+/* Card look for the form */
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 1.6rem;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(6, 57, 57, 0.03);
+}
+
+/* Headings */
+h1 {
+  margin: 0 0 1rem 0;
+  color: var(--accent-2);
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+/* Form */
+.expense-form label {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.expense-form input,
+.expense-form select,
+.expense-form textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  background: #fbffff;
+  color: var(--text);
+  font-size: 1rem;
+  margin-top: 0.35rem;
+  transition: box-shadow 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+
+.expense-form select { appearance: none; }
+
+.expense-form textarea { resize: vertical; min-height: 72px; }
+
+/* Focus */
+.expense-form input:focus,
+.expense-form select:focus,
+.expense-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(51, 180, 168, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Actions / button */
+.actions { margin-top: 0.8rem; text-align: right; }
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(51,180,168,0.16);
+  transition: transform 0.08s ease, box-shadow 0.12s ease, opacity 0.12s;
+}
+
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-primary:active { transform: translateY(0); opacity: 0.95; }
+
+/* Responsive small tweaks */
+@media (min-width: 700px) {
+  .expense-form label {
+    font-size: 0.95rem;
+  }
+
+  /* two-column layout for larger screens */
+  .expense-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem 1rem;
+    align-items: start;
+  }
+
+  /* Make full-width elements span two columns */
+  .expense-form label:nth-child(1),
+  .expense-form label:nth-child(2),
+  .expense-form label:nth-child(3),
+  .expense-form label:nth-child(4),
+  .expense-form label:nth-child(10),
+  .expense-form label:nth-child(11) {
+    grid-column: 1 / -1;
+  }
+
+  .actions { grid-column: 1 / -1; }
+}

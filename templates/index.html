@@ -4,19 +4,61 @@
     <meta charset="utf-8" />
     <title>Price Dashboard</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <style>body{font-family: Arial, sans-serif; margin:20px;} #chart{width:100%;height:600px;}</style>
+
+    <style>
+      :root{
+        --accent:#33b4a8;
+        --accent-2:#1f9b8f;
+        --bg:#f5fffd;
+        --card:#ffffff;
+        --muted:#5f7574;
+        --text:#09363a;
+      }
+      html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;color:var(--text);background:linear-gradient(180deg,#ecfdf6,#e6f7fb);}
+      .wrap{max-width:1100px;margin:28px auto;padding:18px;}
+      .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+      .brand{display:flex;gap:12px;align-items:center;}
+      .logo{width:42px;height:42px;border-radius:10px;background:linear-gradient(180deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(31,155,143,0.12)}
+      h1{margin:0;font-size:1.15rem;color:var(--accent-2)}
+      .controls{display:flex;gap:8px}
+      .btn{display:inline-block;padding:8px 12px;border-radius:10px;text-decoration:none;font-weight:600;color:#fff;background:var(--accent);box-shadow:0 8px 18px rgba(51,180,168,0.12)}
+      .btn.secondary{background:#fff;color:var(--accent-2);border:1px solid rgba(31,155,143,0.08);box-shadow:none}
+      .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 10px 30px rgba(7,46,46,0.06)}
+      #chart{width:100%;height:560px}
+      .note{color:var(--muted);font-size:0.9rem;margin-top:8px}
+      @media(max-width:700px){.topbar{flex-direction:column;align-items:flex-start;gap:10px}.controls{width:100%;justify-content:stretch}.controls .btn{flex:1}}
+    </style>
   </head>
   <body>
-    <!-- <h2>Nulo - Price per oz by Store</h2> -->
-    <div id="chart"></div>
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">PT</div>
+          <div>
+            <h1>Price Dashboard</h1>
+            <div class="note">Nulo — price per oz across stores</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <a class="btn secondary" href="{{ url_for('new_expense_form') }}">+ Add Expense</a>
+          <a class="btn" href="{{ url_for('list_expenses') }}">Transactions</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="chart"></div>
+      </div>
+    </div>
 
     <script>
       const traces = {{ traces | safe }};
       const layout = {
-        title: "Nulo Price per oz over time", 
+        title: "Nulo Price per oz over time",
         xaxis: { title: "Date", type: "date" },
         yaxis: { title: "Price per oz" },
-        hovermode: "closest"
+        hovermode: "closest",
+        margin: { t: 60, l: 60, r: 20, b: 60 }
       };
       Plotly.newPlot("chart", traces, layout, {responsive: true});
     </script>
