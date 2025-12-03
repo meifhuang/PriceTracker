@@ -49,6 +49,16 @@ def insert_expense(conn, data):
         conn.commit()
         return inserted_id
 
+@app.route("/health")
+def health():
+    """Health check endpoint for Railway"""
+    return jsonify({"status": "ok"}), 200
+
+@app.route("/")
+def index():
+    """Redirect root to dashboard"""
+    return redirect(url_for("dashboard"))
+
 @app.route("/expenses/new", methods=["GET"])
 def new_expense_form():
     # simple HTML form to add an expense; returns template
@@ -265,6 +275,19 @@ def dashboard():
             "name": str(company)
         })
     return render_template("index.html", traces=json.dumps(traces))
+
+# Custom error handlers
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("error.html", message="Page not found", code=404), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template("error.html", message="Server error — we're working on it!", code=500), 500
+
+@app.errorhandler(503)
+def service_unavailable(e):
+    return render_template("error.html", message="Service starting up, please wait...", code=503), 503
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
