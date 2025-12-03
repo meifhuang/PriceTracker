@@ -54,11 +54,6 @@ def health():
     """Health check endpoint for Railway"""
     return jsonify({"status": "ok"}), 200
 
-@app.route("/")
-def index():
-    """Redirect root to dashboard"""
-    return redirect(url_for("dashboard"))
-
 @app.route("/expenses/new", methods=["GET"])
 def new_expense_form():
     # simple HTML form to add an expense; returns template
@@ -252,15 +247,22 @@ def edit_expense(expense_id):
 
 
 @app.route("/")
+@app.route("/dashboard")
 def dashboard():
     query = """
         SELECT date, company, price_per_oz
         FROM prices
         ORDER BY date
     """
-    # try to connect up to 5 times before failing
-    with connect_with_retry(url) as pg_conn:
-        df = pd.read_sql(query, pg_conn)
+    try:
+        # try to connect with retries built into connect_with_retry
+        with connect_with_retry(url) as pg_conn:
+            df = pd.read_sql(query, pg_conn)
+    except Exception as e:
+        app.logger.error(f"Database connection failed: {e}")
+        return render_template("error.html", 
+                             message="Database is starting up, please wait...", 
+                             code=503), 503
 
     # ensure date is datetime and sorted
     df["date"] = pd.to_datetime(df["date"])
