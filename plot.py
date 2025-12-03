@@ -251,7 +251,7 @@ def edit_expense(expense_id):
     return redirect(url_for("list_expenses"))
 
 
-@app.route("/dashboard")
+@app.route("/")
 def dashboard():
     query = """
         SELECT date, company, price_per_oz
