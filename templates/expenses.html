@@ -48,11 +48,12 @@
                 <th>Date</th>
                 <th>Item</th>
                 <th>Brand</th>
+                <th>Quantity</th>
                 <th>Company</th>
                 <th>Type</th>
                 <th class="muted">Before</th>
                 <th class="muted">Cashback %</th>
-                <th class="muted">Cashback</th>
+                <!-- <th class="muted">Cashback</th> -->
                 <th class="muted">After</th>
                 <th>Notes</th>
                 <th>Actions</th>
@@ -64,11 +65,12 @@
                   <td>{{ (e.date_purchased or e.created_at) }}</td>
                   <td>{{ e.item_name }}</td>
                   <td>{{ e.brand or '' }}</td>
+                  <td>{{ e.qty or 1 }}</td>
                   <td>{{ e.company }}</td>
                   <td>{{ e.item_type }}</td>
                   <td class="muted">${{ '%.2f'|format(e.total_before_tax or 0) }}</td>
                   <td class="muted">{{ e.cashback_pct is not none and ('%.2f'|format(e.cashback_pct) ~ '%') or '—' }}</td>
-                  <td class="muted">${{ '%.2f'|format(e.cashback_amount or 0) }}</td>
+                  <!-- <td class="muted">${{ '%.2f'|format(e.cashback_amount or 0) }}</td> -->
                   <td class="muted">${{ '%.2f'|format(e.total_after_cashback or 0) }}</td>
                   <td>{{ e.notes or '' }}</td>
                   <td>

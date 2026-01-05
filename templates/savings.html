@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Savings Report</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/new_expense.css') }}">
+    <style>
+      .savings-card { 
+        background: linear-gradient(135deg, #e0f7f4, #f0fbfa); 
+        padding: 2rem; 
+        border-radius: 12px; 
+        margin-bottom: 1.5rem; 
+        box-shadow: 0 4px 12px rgba(31, 155, 143, 0.08);
+      }
+      .stat { 
+        display: flex; 
+        justify-content: space-between; 
+        padding: 0.75rem 0; 
+        border-bottom: 1px solid #d4f1ed; 
+      }
+      .stat:last-child { border-bottom: none; }
+      .stat-label { 
+        color: #5f7574; 
+        font-weight: 600; 
+      }
+      .stat-value { 
+        color: #0f6d66; 
+        font-weight: 700; 
+        font-size: 1.1rem; 
+      }
+      .savings-positive { 
+        color: #0f6d66; 
+        font-size: 1.5rem;
+      }
+      .savings-negative { 
+        color: #c44; 
+        font-size: 1.5rem;
+      }
+      h2 { 
+        color: #0f6d66; 
+        margin-top: 0; 
+        margin-bottom: 1.5rem;
+      }
+      .highlight-box {
+        background: linear-gradient(135deg, #33b4a8, #1f9b8f);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 18px rgba(51, 180, 168, 0.2);
+      }
+      .highlight-box .big-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0.5rem 0;
+      }
+      .highlight-box .label {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .section-divider {
+        margin: 2rem 0;
+        border-top: 2px solid #d4f1ed;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <div class="card">
+        <div class="topbar">
+          <div class="title">
+            <h1>💰 Savings Report</h1>
+            <div class="muted">See how much you've saved on cat food</div>
+          </div>
+          <div class="nav-actions">
+            <a class="btn light" href="{{ url_for('dashboard') }}">← Dashboard</a>
+            <a class="btn" href="{{ url_for('list_expenses') }}">Transactions</a>
+          </div>
+        </div>
+
+        <!-- Highlight: Total Savings -->
+        <div class="highlight-box">
+          <div class="label">Total Savings</div>
+          <div class="big-number {% if savings > 0 %}savings-positive{% else %}savings-negative{% endif %}">
+            ${{ savings }}
+          </div>
+          <div class="label">{{ savings_pct }}% saved vs. market average</div>
+        </div>
+
+        <!-- Market vs. Your Prices -->
+        <div class="savings-card">
+          <h2>📊 Price Comparison</h2>
+          <div class="stat">
+            <span class="stat-label">Market Average (per oz)</span>
+            <span class="stat-value">${{ market_avg }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Your Average (per purchase)</span>
+            <span class="stat-value">${{ avg_purchase_price }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Your Price per oz</span>
+            <span class="stat-value">${{ avg_price_per_oz }}</span>
+          </div>
+        </div>
+
+        <!-- Purchase Summary -->
+        <div class="savings-card">
+          <h2>📦 Purchase Summary</h2>
+          <div class="stat">
+            <span class="stat-label">Total Purchases</span>
+            <span class="stat-value">{{ purchase_count }} orders</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Total Volume</span>
+            <span class="stat-value">{{ total_oz }} oz</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">You Paid</span>
+            <span class="stat-value">${{ total_spent }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Market Cost Would Be</span>
+            <span class="stat-value">${{ market_cost }}</span>
+          </div>
+        </div>
+
+        <p class="muted" style="text-align: center; margin-top: 2rem;">
+          Based on {{ purchase_count }} Nulo cat food purchases
+        </p>
+      </div>
+    </main>
+  </body>
+</html>

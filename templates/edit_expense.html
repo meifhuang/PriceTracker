@@ -28,6 +28,10 @@
             <input name="brand" id="brand" value="{{ expense.brand or '' }}">
           </label>
 
+          <label>Qty
+            <input name="qty" id="qty" type="number" min="1" step="1" value="{{ expense.qty or 1 }}">
+          </label>
+
           <label>Company
             <input name="company" id="company" required value="{{ expense.company or '' }}">
           </label>
