@@ -110,8 +110,10 @@ def scrape_petco(driver):
     try:
         driver.get(url)
         time.sleep(random.uniform(6.0, 10.0))
+        # sale_price = WebDriverWait(driver, 10).until(
+        #     EC.presence_of_element_located((By.CLASS_NAME,"purchase-type-selector-styled__PurchaseTypePrice-sc-663c57fc-1")))
         sale_price = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME,"purchase-type-selector-styled__PurchaseTypePrice-sc-663c57fc-1")))
+            EC.presence_of_element_located((By.CLASS_NAME,"purchase-type-selector-styled__PurchaseTypePrice-sc-7a1b7620-1")))
 
         discount_elems = driver.find_elements(By.ID, "sale-message-red")
         discount = discount_elems[0] if discount_elems else None
@@ -243,6 +245,7 @@ def run_scraper():
         pg_conn = connect_with_retry(url)
         with pg_conn.cursor() as pg_cursor:
             for scrape in [scrape_petsmart, scrape_petco, scrape_chewy, scrape_amazon]:
+            # for scrape in [scrape_petco]:
                 try:
                     record = scrape(driver)
                     if record:

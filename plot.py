@@ -28,7 +28,7 @@ def insert_expense(conn, data):
     sql = """
     INSERT INTO expenses
     (item_name, brand, url, company, item_type, qty, total_before_tax, cashback_pct, cashback_engine, total_after_cashback, date_purchased, notes)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     RETURNING id
     """
     with conn.cursor() as cur:
@@ -125,16 +125,19 @@ def create_expense():
     try:
         with connect_with_retry(url) as conn:
             new_id = insert_expense(conn, expense)
+            print(new_id, "CREATED")
+        app.logger.info(f"Successfully created expense {new_id}")
         if request.is_json:
             return jsonify({"status": "ok", "id": new_id}), 201
         else:
             return redirect(url_for("list_expenses"))
     except Exception as e:
+        app.logger.exception(f"Failed to create expense: {e}")
+        print('FAILED')
         if request.is_json:
-            return jsonify({"error": str(e)}), 500
+             return jsonify({"error": str(e)}), 500
         else:
-            # could flash message; simple fallback: redirect back to form
-            return redirect(url_for("new_expense_form"))
+             return redirect(url_for("list_expenses"))
 
 @app.route("/expenses", methods=["GET"])
 def list_expenses():
