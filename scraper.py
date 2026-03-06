@@ -9,8 +9,10 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2 import OperationalError
 from database.connect_db import connect_with_retry
+from send_email import send_price_alert
 
 load_dotenv()
+email = os.getenv("GMAIL_EMAIL")
 
 # --- Setup logging ---
 logging.basicConfig(
@@ -251,6 +253,8 @@ def run_scraper():
                     if record:
                         insert_price_record(pg_cursor,record)
                         pg_conn.commit()
+                        if float(record['price_per_oz']) <= .20:
+                            send_price_alert("Nulo Pet Food", record['price_per_oz'], email, record["url"])
 
                 except Exception as e:
                     pg_conn.rollback()
