@@ -338,15 +338,36 @@ def calculate_savings():
 @app.route("/")
 @app.route("/dashboard")
 def dashboard():
-    query = """
-        SELECT date, company, price_per_oz
-        FROM prices
-        ORDER BY date
-    """
+    # Get selected product from query params (default to first product)
+    selected_product = request.args.get("product", None)
+    
     try:
-        # try to connect with retries built into connect_with_retry
         with connect_with_retry(url) as pg_conn:
-            df = pd.read_sql(query, pg_conn)
+            # Fetch all available products
+            products_query = """
+                SELECT DISTINCT product
+                FROM prices
+                ORDER BY product
+            """
+            products_df = pd.read_sql(products_query, pg_conn)
+            products = products_df["product"].tolist()
+            
+            # If no product selected, default to first one
+            if not selected_product or selected_product not in products:
+                selected_product = products[0] if products else None
+            
+            # Fetch price data for selected product
+            if selected_product:
+                query = """
+                    SELECT date, company, price_per_oz, product
+                    FROM prices
+                    WHERE product = %s
+                    ORDER BY date
+                """
+                df = pd.read_sql(query, pg_conn, params=(selected_product,))
+            else:
+                df = pd.DataFrame()  # Empty if no products exist
+                
     except Exception as e:
         app.logger.error(f"Database connection failed: {e}")
         return render_template("error.html", 
@@ -365,7 +386,11 @@ def dashboard():
             "mode": "lines+markers",
             "name": str(company)
         })
-    return render_template("index.html", traces=json.dumps(traces))
+    
+    return render_template("index.html", 
+                         traces=json.dumps(traces),
+                         products=products,
+                         selected_product=selected_product)
 
 # Custom error handlers
 @app.errorhandler(404)

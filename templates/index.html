@@ -47,6 +47,26 @@
         </div>
       </div>
 
+     
+
+      <div style="margin-bottom: 20px;">
+    <label for="product-selector">Select Product:</label>
+    <select id="product-selector" onchange="changeProduct(this.value)" style="padding: 8px; font-size: 16px;">
+        {% for product in products %}
+            <option value="{{ product }}" {% if product == selected_product %}selected{% endif %}>
+                {{ product }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+ <script>
+      function changeProduct(product) {
+          // Redirect to dashboard with selected product
+          window.location.href = `/dashboard?product=${encodeURIComponent(product)}`;
+      }
+      </script>
+
       <div class="card">
         <div id="chart"></div>
       </div>

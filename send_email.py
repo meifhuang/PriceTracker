@@ -1,10 +1,13 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+# Load .env from the script's directory
+dotenv_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path)
 
 def send_price_alert(product_name, price_per_oz, recipient_email, url):
     """Send email alert when price is below threshold"""

@@ -55,19 +55,23 @@ def get_chrome_major_version():
     return None
 
 def scrape_chewy(driver):
-    url = 'https://www.chewy.com/nulo-freestyle-turkey-chicken-recipe/dp/168510'
+    url = 'https://www.chewy.com/dr-elseys-ultra-unscented-clumping/dp/327816'
     try:
         driver.get(url)
         time.sleep(random.uniform(6.0, 10.0))
         sale_price = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME,"styles_priceNoDeal__JGk8L")))
+            EC.presence_of_element_located((By.CLASS_NAME,"styles_ppuText__KRwon")))
         if not sale_price:
             logging.warning(f"No price found on Chewy page:")
             return None
-        price = sale_price.text.splitlines()[-1].replace('$', '').strip()
-        pack_size = "12 cans"
-        unit_oz = 12.5
-        price_per_oz = (float(price) / 12.0) / unit_oz
+
+        price_text = sale_price.text[2:6]
+        # print(price_text)
+        price = float(price_text) * 20.0
+        # print(price)
+        pack_size = "20 lb"
+        # unit_oz = 12.5
+        price_per_oz = float(price_text)
 
         return {
             'company': 'Chewy',
@@ -81,7 +85,7 @@ def scrape_chewy(driver):
         return None
 
 def scrape_amazon(driver):
-    url = 'https://www.amazon.com/Nulo-Turkey-Chicken-Canned-Ounce/dp/B06WV774HB'
+    url = 'https://www.amazon.com/Dr-Elseys-Premium-Clumping-Litter/dp/B0009X29WK'
     try:
         driver.get(url)
         time.sleep(random.uniform(6.0, 10.0))
@@ -94,9 +98,9 @@ def scrape_amazon(driver):
             logging.error(f"Failed to scrape from Amazon:")
 
         price = int(whole_price.text) + (int(fraction_price.text) * .01)
-        pack_size = "12 cans"
-        unit_oz = 12.5
-        price_per_oz = (price / 12) / unit_oz
+        pack_size = "40 lb"
+        # unit_oz = 12.5
+        price_per_oz = (price / 40)
 
         return {
             'company': 'Amazon',
@@ -111,42 +115,43 @@ def scrape_amazon(driver):
         return None
 
 def scrape_petco(driver):
-    url = 'https://www.petco.com/shop/en/petcostore/product/nulo-medalseries-grain-free-turkey-and-chicken-wet-cat-food'
+    url = 'https://www.petco.com/shop/en/petcostore/product/precious-cat-dr-elseys-ultra-scoopable-multi-cat-cat-litter-20-lbs-2184309'
     try:
         driver.get(url)
         time.sleep(random.uniform(6.0, 10.0))
         # sale_price = WebDriverWait(driver, 10).until(
         #     EC.presence_of_element_located((By.CLASS_NAME,"purchase-type-selector-styled__PurchaseTypePrice-sc-663c57fc-1")))
         sale_price = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME,"purchase-type-selector-styled__PurchaseTypePrice-sc-7a1b7620-1")))
-        discount_elems = driver.find_elements(By.ID, "sale-message-red")
-        discount = discount_elems[0] if discount_elems else None
+            EC.presence_of_element_located((By.CLASS_NAME,
+                                            "purchase-type-selector-styled__PurchaseTypePrice-sc-7a1b7620-1")))
+        # discount_elems = driver.find_elements(By.ID, "sale-message-red")
+        # discount = discount_elems[0] if discount_elems else None
 
         if not sale_price:
             logging.warning(f"No price found on Petco page:")
             return None
         # parse discount if present (look for "XX%")
         percent_off = None
-        if discount:
-            discount_text = discount.text
-            m = re.search(r'(\d+)%', discount_text)
-            if m:
-                try:
-                    percent_off = int(m.group(1))
-                except ValueError:
-                    percent_off = None
+        # if discount:
+        #     discount_text = discount.text
+        #     m = re.search(r'(\d+)%', discount_text)
+        #     if m:
+        #         try:
+        #             percent_off = int(m.group(1))
+        #         except ValueError:
+        #             percent_off = None
 
-        if percent_off is not None:
-            logging.info(f"Petco discount: {percent_off}%")
+        # if percent_off is not None:
+        #     logging.info(f"Petco discount: {percent_off}%")
 
         price_clean = float(sale_price.text.replace('$','').strip())
         # apply discount if any
-        if percent_off:
-            price_clean = price_clean * (100 - percent_off) / 100.0
+        # if percent_off:
+        #     price_clean = price_clean * (100 - percent_off) / 100.0
 
-        pack_size = "12 cans"
-        unit_oz = 12.5
-        price_per_oz = (price_clean / 12) / unit_oz
+        pack_size = "20 lb"
+        # unit_oz = 12.5
+        price_per_oz = (price_clean / 20)
 
         return {
             'company': 'Petco',
@@ -161,25 +166,38 @@ def scrape_petco(driver):
         return None
 
 def scrape_petsmart(driver):
-    url = 'https://www.petsmart.com/cat/food-and-treats/wet-food/nulo-medalseries--all-life-stages-wet-cat-food---grain-free-no-corn-wheat-and-soy-125-oz-36959.html'
+    url = "https://www.petsmart.com/cat/litter-and-waste-disposal/litter/dr-elseys-precious-cat-ultra-clumping-multi-cat-clay-cat-litter---unscented-low-tracking-13490.html#:~:text=20-,Lb,-40%20Lb"
     try:
+        
         driver.get(url)
         time.sleep(random.uniform(6.0, 10.0))
-        sale_price = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME,"sparky-c-price--sale")))
-        og_price = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME,"sparky-c-price")))
-        price_str = sale_price.text if sale_price else og_price.text if og_price else None
+        try:
+            size_radio = driver.find_element(By.CSS_SELECTOR, "input[name='size'][value='20 Lb']")
+            driver.execute_script("arguments[0].click();", size_radio)
+            time.sleep(3)  # Wait for price to update
+            price_str = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME,"optexPrice")))
+            print("petsmart", price_str.text)
 
-        if not price_str:
-            logging.warning(f"No price found on Petsmart page")
-            return None
+        except:
+            logging.warning("Could not select 20 Lb size on PetSmart")
+            return None 
+        
+        # sale_price = WebDriverWait(driver, 10).until(
+        #     EC.presence_of_element_located((By.CLASS_NAME,"sparky-c-price--sale")))
+        # og_price = WebDriverWait(driver, 10).until(
+        #     EC.presence_of_element_located((By.CLASS_NAME,"sparky-c-price")))
+        # price_str = sale_price.text if sale_price else og_price.text if og_price else None
 
-        price_clean = float(price_str.replace('$', '').strip())
+        # if not price_str:
+        #     logging.warning(f"No price found on Petsmart page")
+        #     return None
+        
+        price_clean = float(price_str.text.replace('$', '').strip())
 
-        pack_size = "1 can"
-        unit_oz = 12.5
-        price_per_oz = price_clean / unit_oz
+        pack_size = "20 lb"
+        # unit_oz = 12.5
+        price_per_oz = price_clean / 20
 
         return {
             'company': 'PetSmart',
@@ -199,7 +217,7 @@ def insert_price_record(cursor, product_data):
     product_data should be a dict or object with:
     product, company, url, price, price_per_oz, pack_size
     """
-    product = "Nulo Turkey and Chicken Pate Canned Cat Food"
+    product = "Dr Elsey's Ultra Unscented Clumping Clay Litter"
     try:
         cursor.execute(
             '''
@@ -248,16 +266,18 @@ def run_scraper():
     try:
         pg_conn = connect_with_retry(url)
         with pg_conn.cursor() as pg_cursor:
-            for scrape in [scrape_petsmart, scrape_petco, scrape_chewy, scrape_amazon]:
+            # for scrape in [scrape_petsmart, scrape_petco, scrape_chewy, scrape_amazon]:
             # for scrape in [scrape_petco]:
+            # for scrape in [scrape_chewy]:
+            for scrape in [scrape_petsmart]:
                 try:
                     record = scrape(driver)
                     if record:
                         insert_price_record(pg_cursor,record)
                         pg_conn.commit()
-                        if float(record['price_per_oz']) <= .20:
-                            send_price_alert("Nulo Pet Food", record['price_per_oz'], email, record["url"])
-                            logging.info("Email sent!")
+                        # if float(record['price_per_oz']) <= .20:
+                        #     send_price_alert("Nulo Pet Food", record['price_per_oz'], email, record["url"])
+                        #     logging.info("Email sent!")
 
                 except Exception as e:
                     pg_conn.rollback()
