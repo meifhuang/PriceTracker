@@ -172,12 +172,20 @@ def scrape_petsmart(driver):
         driver.get(url)
         time.sleep(random.uniform(6.0, 10.0))
         try:
-            size_radio = driver.find_element(By.CSS_SELECTOR, "input[name='size'][value='20 Lb']")
+            size_radio = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input[name='size'][value='20 Lb']")))
+            print(size_radio)
             driver.execute_script("arguments[0].click();", size_radio)
+            
+            # size_radio.click()
             time.sleep(3)  # Wait for price to update
-            price_str = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME,"optexPrice")))
-            print("petsmart", price_str.text)
+            # price_str = WebDriverWait(driver, 10).until(
+            # EC.presence_of_element_located((By.CLASS_NAME,"optexPrice")))
+            sale_price = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME,"sparky-c-price--sale")))
+            og_price = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME,"sparky-c-price")))
+            price_str = sale_price.text if sale_price else og_price.text if og_price else None
 
         except:
             logging.warning("Could not select 20 Lb size on PetSmart")
@@ -193,7 +201,7 @@ def scrape_petsmart(driver):
         #     logging.warning(f"No price found on Petsmart page")
         #     return None
         
-        price_clean = float(price_str.text.replace('$', '').strip())
+        price_clean = float(price_str.replace('$', '').strip())
 
         pack_size = "20 lb"
         # unit_oz = 12.5
@@ -266,7 +274,7 @@ def run_scraper():
     try:
         pg_conn = connect_with_retry(url)
         with pg_conn.cursor() as pg_cursor:
-            # for scrape in [scrape_petsmart, scrape_petco, scrape_chewy, scrape_amazon]:
+            # for scrape in [scrape_petco, scrape_chewy, scrape_amazon, scrape_petsmart]:
             # for scrape in [scrape_petco]:
             # for scrape in [scrape_chewy]:
             for scrape in [scrape_petsmart]:

@@ -36,7 +36,7 @@
           <div class="logo">PT</div>
           <div>
             <h1>Price Dashboard</h1>
-            <div class="note">Nulo — price per oz across stores</div>
+            <!-- <div class="note">Nulo — price per oz across stores</div> -->
           </div>
         </div>
 
@@ -63,6 +63,7 @@
  <script>
       function changeProduct(product) {
           // Redirect to dashboard with selected product
+          document.title = `${product} - Price Dashboard`
           window.location.href = `/dashboard?product=${encodeURIComponent(product)}`;
       }
       </script>
@@ -75,9 +76,9 @@
     <script>
       const traces = {{ traces | safe }};
       const layout = {
-        title: "Nulo Price per oz over time",
+        title: "{{ selected_product }}",
         xaxis: { title: "Date", type: "date" },
-        yaxis: { title: "Price per oz" },
+        // yaxis: { title: "Price per oz" },
         hovermode: "closest",
         margin: { t: 60, l: 60, r: 20, b: 60 }
       };
